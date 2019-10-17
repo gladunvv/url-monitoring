@@ -1,16 +1,16 @@
 import pandas as pd
 import requests
-import sqlite3
 import email.utils as eut
 import datetime
 from models import Monitoring
 import json
 import config
-import os
 import sys
 import traceback
 
+
 def get_path_from_args():
+
     try:
         path = sys.argv[1]
     except IndexError:
@@ -18,6 +18,7 @@ def get_path_from_args():
         sys.exit()
     else:
         read_excel_file(path)
+
 
 def read_excel_file(path):
     try:
@@ -28,6 +29,7 @@ def read_excel_file(path):
     else:
         only_fetch_true_pull(data)
 
+
 def only_fetch_true_pull(data):
     try:
         data = data[data['fetch'] == 1]
@@ -37,12 +39,13 @@ def only_fetch_true_pull(data):
     else:
         get_request_in_pull_url(data)
 
+
 def get_request_in_pull_url(data):
     for index, row in data.iterrows():
         url = row['url']
         label = row['label']
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=config.TIMEOUT)
         except Exception as ex:
             exception_type = type(ex).__name__
             exception_value = list(ex.args)
@@ -50,6 +53,7 @@ def get_request_in_pull_url(data):
             errors_dump_load_to_file(url, exception_type, exception_value, stack_info)
         else:
             create_monitoring_object(response, url, label)
+
 
 def errors_dump_load_to_file(url, exception_type, exception_value, stack_info):
     errors_dict = {
@@ -62,6 +66,7 @@ def errors_dump_load_to_file(url, exception_type, exception_value, stack_info):
     }
     file_object = open(config.PATH_ERRORS_FILE, 'w')
     json.dump(errors_dict, file_object)
+
 
 def my_parsedate(text):
     return datetime.datetime(*eut.parsedate(text)[:6])
@@ -90,6 +95,7 @@ def create_monitoring_object(response, url, label):
     )
 
     monitoring.save()
+
 
 if __name__ == "__main__":
     get_path_from_args()

@@ -1,5 +1,4 @@
 from peewee import *
-import os
 import config
 
 db = SqliteDatabase(config.PATH_DB)
@@ -23,5 +22,6 @@ def initialize_db():
     db.connect()
     db.create_tables([Monitoring], safe=True)
     db.close()
+
 
 initialize_db()
