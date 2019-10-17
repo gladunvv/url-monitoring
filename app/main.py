@@ -4,10 +4,11 @@ import sqlite3
 import email.utils as eut
 import datetime
 from models import Monitoring
-
+import json
+import config
 import os
 import sys
-
+import traceback
 
 def get_path_from_args():
     try:
@@ -40,8 +41,27 @@ def get_request_in_pull_url(data):
     for index, row in data.iterrows():
         url = row['url']
         label = row['label']
-        response = requests.get(url)
-        create_monitoring_object(response, url, label)
+        try:
+            response = requests.get(url)
+        except Exception as ex:
+            exception_type = type(ex).__name__
+            exception_value = list(ex.args)
+            stack_info = traceback.format_exc()
+            errors_dump_load_to_file(url, exception_type, exception_value, stack_info)
+        else:
+            create_monitoring_object(response, url, label)
+
+def errors_dump_load_to_file(url, exception_type, exception_value, stack_info):
+    errors_dict = {
+        'url': url,
+        'error': {
+            'exception_type': exception_type,
+            'exception_value': exception_value,
+            'stack_info': stack_info
+        }
+    }
+    file_object = open(config.PATH_ERRORS_FILE, 'w')
+    json.dump(errors_dict, file_object)
 
 def my_parsedate(text):
     return datetime.datetime(*eut.parsedate(text)[:6])
@@ -57,7 +77,7 @@ def create_monitoring_object(response, url, label):
             content_length = res_headers['content-length']
         else:
             content_length = None
-    except:
+    except KeyError:
         content_length = None
 
     monitoring = Monitoring.create(

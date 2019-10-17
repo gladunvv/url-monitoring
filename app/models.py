@@ -1,13 +1,8 @@
 from peewee import *
 import os
+import config
 
-
-
-# name_db = 'database.db'
-# cur_dir = os.getcwd()
-# path_db = os.path.join(cur_dir, name_db)
-
-db = SqliteDatabase('new_db.db')
+db = SqliteDatabase(config.PATH_DB)
 
 
 class BaseModel(Model):
