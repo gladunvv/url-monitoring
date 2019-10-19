@@ -61,7 +61,7 @@ def get_request_in_pull_url(data):
 
 
 def errors_dump_load_to_file(ts, url, exception_type, exception_value, stack_info):
-    """Формируем дамп с ошибками при возникшими при образении к url адресам"""
+    """Формируем дамп с ошибками возникшими при обращении к url адресам"""
     errors_dict = {
         'timestamp': ts,
         'url': url,
