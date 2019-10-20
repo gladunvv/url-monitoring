@@ -1,5 +1,3 @@
-import email.utils as eut
-import pandas as pd
 import traceback
 import requests
 import datetime
@@ -7,11 +5,15 @@ import config
 import json
 import time
 import sys
+
+import pandas as pd
+import email.utils as eut
+
 from models import Monitoring
 
 
 def get_path_from_args():
-    """Получяем путь к xlsx файлу аргументом при запуске скрипта"""
+    """Получение пути к xlsx файлу аргументом при запуске скрипта"""
     try:
         path = sys.argv[1]
     except IndexError:
@@ -22,7 +24,7 @@ def get_path_from_args():
 
 
 def read_excel_file(path):
-    """Читаем xlsx файл для его дальнейшей обработки"""
+    """Чтение xlsx файла для дальнейшей работы с датафреймом"""
     try:
         data = pd.read_excel(path)
     except FileNotFoundError:
@@ -33,7 +35,7 @@ def read_excel_file(path):
 
 
 def only_fetch_true_pull(data):
-    """Отбираем пулл где fetch равен 1"""
+    """Отбор пулла где fetch равен 1"""
     try:
         data = data[data['fetch'] == 1]
     except KeyError:
@@ -44,7 +46,7 @@ def only_fetch_true_pull(data):
 
 
 def get_request_in_pull_url(data):
-    """Отправляем get запросы ко всем url из выбранного пулла"""
+    """Отправление get запроса ко всем url из выбранного пулла"""
     for index, row in data.iterrows():
         url = row['url']
         label = row['label']
@@ -61,7 +63,7 @@ def get_request_in_pull_url(data):
 
 
 def errors_dump_load_to_file(ts, url, exception_type, exception_value, stack_info):
-    """Формируем дамп с ошибками возникшими при обращении к url адресам"""
+    """Формирмирование дампа ошибок возникших при обращении к url адресам"""
     errors_dict = {
         'timestamp': ts,
         'url': url,
@@ -76,12 +78,12 @@ def errors_dump_load_to_file(ts, url, exception_type, exception_value, stack_inf
 
 
 def my_parsedate(text):
-    """Переводим дату полученную в resonse в формат datetime"""
+    """Перевод даты полученной в resonse в формат datetime"""
     return datetime.datetime(*eut.parsedate(text)[:6])
 
 
 def create_monitoring_object(response, url, label):
-    """Создаем объект monitoring на основе response-данных и сохраняем его в базу данных"""
+    """Создание объекта monitoring на основе response-данных и сохранение его в базу данных"""
     res_headers = response.headers
     ts = my_parsedate(res_headers['date'])
     response_time = response.elapsed.total_seconds()
