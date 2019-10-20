@@ -2,7 +2,7 @@ import os
 
 NAME_DB = 'database.db'
 
-BASE_DIR = BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.getcwd()
 
 RELATIVE_PATH_FOR_DB = ''
 
